@@ -38,13 +38,6 @@ Prefer the named property-list member over a numeric index when the target API e
   and templates.
 - Read [api-fundamentals.md](references/api-fundamentals.md) before introducing unfamiliar API
   symbols or lifecycle behavior.
-- Read [actions-and-addins.md](references/actions-and-addins.md) for extension selection,
-  registration, and lifecycle.
-- Read [project-data.md](references/project-data.md) for pages, functions, devices, properties,
-  placements, and connections.
-- Read [transactions-and-safety.md](references/transactions-and-safety.md) before any mutation.
-- Read [debugging.md](references/debugging.md) for build, deployment, attachment, and logging.
-- Read [troubleshooting.md](references/troubleshooting.md) for diagnostic decision paths.
 
 ## Use bundled tools
 
@@ -64,9 +57,3 @@ The scaffold copies all seven sources from `assets/utilities/` into the generate
 Use `scaffold-project.ps1` only for new projects. Modify existing project files directly after
 inspecting their conventions. The scaffold expects the EPLAN 2026 unified assembly set (`AFu`,
 `Baseu`, `DataModelu`, `Guiu`, `HEServicesu`, and `MasterDatau`) in `-AssemblyDirectory`.
-
-## Finish with a verification summary
-
-State the targeted EPLAN release and evidence source, reused/extended Utility methods, direct raw
-API calls added with official links, selected .NET target and architecture, extension type and load
-model, build/test results, unverified behavior, and safe manual steps required inside EPLAN.
