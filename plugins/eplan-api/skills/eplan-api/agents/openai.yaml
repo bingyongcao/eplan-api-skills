@@ -1,0 +1,4 @@
+interface:
+  display_name: "EPLAN API"
+  short_description: "Build and troubleshoot EPLAN API extensions"
+  default_prompt: "Use $eplan-api to create a version-aware EPLAN API extension."

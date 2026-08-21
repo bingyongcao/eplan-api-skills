@@ -1,0 +1,21 @@
+{
+  "name": "eplan-api-skills",
+  "owner": {
+    "name": "eplan-api-skills contributors",
+    "url": "https://github.com/bingyongcao/eplan-api-skills"
+  },
+  "description": "Skills for developing against the EPLAN Platform API.",
+  "metadata": {
+    "description": "Skills for developing against the EPLAN Platform API."
+  },
+  "plugins": [
+    {
+      "name": "eplan-api",
+      "source": "./plugins/eplan-api",
+      "description": "Build, review, and troubleshoot version-aware EPLAN Platform API extensions.",
+      "version": "0.1.0",
+      "category": "development",
+      "tags": ["eplan", "dotnet", "csharp", "automation"]
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "name": "eplan-api",
+  "version": "0.1.0",
+  "description": "Build, review, and troubleshoot version-aware EPLAN Platform API extensions.",
+  "author": {
+    "name": "eplan-api-skills contributors",
+    "url": "https://github.com/bingyongcao"
+  },
+  "homepage": "https://github.com/bingyongcao/eplan-api-skills",
+  "repository": "https://github.com/bingyongcao/eplan-api-skills",
+  "license": "MIT",
+  "keywords": ["eplan", "eplan-api", "dotnet", "csharp", "automation"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "EPLAN API",
+    "shortDescription": "Build version-aware EPLAN API extensions.",
+    "longDescription": "Discover local EPLAN API assemblies, scaffold actions and add-ins, review project-data automation, and diagnose build or runtime failures without guessing version-specific APIs.",
+    "developerName": "eplan-api-skills contributors",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Write"],
+    "websiteURL": "https://github.com/bingyongcao/eplan-api-skills",
+    "defaultPrompt": [
+      "Create a version-aware EPLAN API action.",
+      "Diagnose this EPLAN API build failure.",
+      "Review this EPLAN project automation safely."
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "eplan-api",
+  "version": "0.1.0",
+  "description": "Build, review, and troubleshoot version-aware EPLAN Platform API extensions.",
+  "author": {
+    "name": "eplan-api-skills contributors",
+    "url": "https://github.com/bingyongcao"
+  },
+  "homepage": "https://github.com/bingyongcao/eplan-api-skills",
+  "repository": "https://github.com/bingyongcao/eplan-api-skills",
+  "license": "MIT",
+  "keywords": ["eplan", "eplan-api", "dotnet", "csharp", "automation"]
+}
