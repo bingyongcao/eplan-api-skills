@@ -1,14 +1,11 @@
 ---
 name: eplan-api
-description: Build, modify, and review EPLAN add-in code, preferring existing EplanUtilities wrappers before direct API access. Use for EPLAN project-data operations and version-verified EPLAN API work. Do not use for ordinary .NET work unrelated to EPLAN.
+description: Build, modify, and review EPLAN add-in code. Use for EPLAN project-data operations. Do not use for ordinary .NET work unrelated to EPLAN.
 ---
 
 # EPLAN API
 
-Develop against the EPLAN Platform P8 API without assuming that API versions, assemblies, or runtime behavior are interchangeable.
-
-Prefer the named property-list member over a numeric index when the target API exposes it.
-
+Develop against the EPLAN Platform P8 API.
 
 ## Follow the workflow
 
