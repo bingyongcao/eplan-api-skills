@@ -58,13 +58,20 @@ a deliberate migration.
 ## MVVM for EPLAN WPF UI
 
 Use MVVM for non-trivial WPF UI with state, commands, validation, or testable interaction logic.
-Do not introduce an MVVM framework for an action without UI or a small, self-contained dialog.
+Prefer the `CommunityToolkit.Mvvm` package instead of custom observable-object and command
+infrastructure. Reuse the repository's installed package version; before adding it, verify that the
+selected version, source generators, target framework, C# compiler, and analyzer environment are
+compatible. Do not retarget an EPLAN project solely to adopt the toolkit. Use a small manual
+implementation only when the toolkit is incompatible or the repository explicitly avoids it.
+
+Do not introduce MVVM infrastructure for an action without UI or a small, self-contained dialog.
 
 ### Responsibilities
 
 - **View:** XAML, layout, bindings, visual state, and strictly visual code-behind.
-- **View model:** Presentation state, validation, and `ICommand` orchestration. Implement
-  `INotifyPropertyChanged` correctly and raise changes only when values actually change.
+- **View model:** Presentation state, validation, and command orchestration. Prefer
+  `ObservableObject` (or `ObservableRecipient` when messaging and activation are genuinely needed),
+  `RelayCommand`, and `AsyncRelayCommand` from `CommunityToolkit.Mvvm`.
 - **Model/domain:** EPLAN-independent values and business rules where practical.
 - **Services/adapters:** EPLAN API access, selection, dialogs, logging, dispatcher access, and
   other host-specific operations.
@@ -76,8 +83,17 @@ Do not introduce an MVVM framework for an action without UI or a small, self-con
   domain objects, then resolve and validate live EPLAN objects inside the service operation.
 - Inject services into view models through constructors. Keep design-time data and parameterless
   constructors separate from production dependency resolution when the designer requires them.
-- Bind user actions to commands. Use code-behind only for view-specific behavior such as focus,
-  window chrome, drag handling, or controls that cannot be expressed cleanly through binding.
+- When source generators are compatible, prefer `[ObservableProperty]`, `[RelayCommand]`, and
+  related notification attributes to repetitive boilerplate. Otherwise derive from
+  `ObservableObject`, call `SetProperty`, and expose toolkit command types explicitly.
+- Bind user actions to toolkit commands. Use code-behind only for view-specific behavior such as
+  focus, window chrome, drag handling, or controls that cannot be expressed cleanly through binding.
+- Use `AsyncRelayCommand` for asynchronous user operations and its execution/cancellation state for
+  UI feedback. Prevent unintended command re-entry and surface exceptions through the established
+  error-reporting path.
+- Use `WeakReferenceMessenger` only when direct service or parent-child communication would create
+  inappropriate coupling. Keep message contracts specific and unregister recipients with explicit
+  lifetimes when automatic weak-reference cleanup is insufficient.
 - Represent long-running work with busy state, cancellation where meaningful, and disabled command
   re-entry. Keep the UI responsive without moving EPLAN calls to an unverified thread context.
 - Perform project mutations only after explicit validation or confirmation appropriate to the

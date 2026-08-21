@@ -407,7 +407,7 @@ namespace EplanUtilities
             int index) // start from 0
         {
             if (func == null) throw new ArgumentNullException(nameof(func));
-            if (index < 0) throw new ArgumentException("invalid argument: can not be negative", nameof(index));
+            if (index < 0) throw new ArgumentOutOfRangeException(nameof(index));
 
             ArticleReference[] allRefs = func.ArticleReferences;
             if (index >= allRefs.Length)
@@ -448,6 +448,54 @@ namespace EplanUtilities
 
             foreach (var partNr in strPartNrList)
                 func.AddArticleReference(partNr);
+        }
+
+        /// <summary>
+        /// set the property of specific article reference of function
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="articleRefIndex"></param>
+        /// <param name="propertyId"></param>
+        /// <param name="valueStr"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public static void SetArticleRefProperty(
+            Function func,
+            int articleRefIndex,
+            int propertyId,
+            string valueStr)
+        {
+            if (func == null) throw new ArgumentNullException(nameof(func));
+            if (articleRefIndex < 0 || articleRefIndex >= func.ArticleReferences.Length) 
+                throw new ArgumentOutOfRangeException(nameof(articleRefIndex));
+
+            func.ArticleReferences[articleRefIndex]
+                .ParentObject
+                .Properties[propertyId, 1] = valueStr;
+        }
+
+        /// <summary>
+        /// set the property of specific article reference of function
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="articleRefIndex"></param>
+        /// <param name="userDefinedPropertyName"></param>
+        /// <param name="valueStr"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public static void SetArticleRefProperty(
+            Function func,
+            int articleRefIndex,
+            string userDefinedPropertyName,
+            string valueStr)
+        {
+            if (func == null) throw new ArgumentNullException(nameof(func));
+            if (articleRefIndex < 0 || articleRefIndex >= func.ArticleReferences.Length) 
+                throw new ArgumentOutOfRangeException(nameof(articleRefIndex));
+
+            func.ArticleReferences[articleRefIndex]
+                .ParentObject
+                .Properties[userDefinedPropertyName][1] = valueStr;
         }
     }
 }
