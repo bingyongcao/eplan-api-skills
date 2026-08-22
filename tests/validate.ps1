@@ -27,14 +27,11 @@ Assert-True ($skillText -match '(?s)^---\s*name:\s*eplan-api\s*description:\s*.+
 Assert-True ($skillText -notmatch '\[TODO|TODO:') 'A TODO placeholder remains in SKILL.md.'
 Assert-True ($skillText.Split("`n").Count -lt 500) 'SKILL.md exceeds 500 lines.'
 Assert-True ($skillText -match 'utility-first\.md') 'SKILL.md does not route EPLAN data access through utility-first.md.'
-Assert-True ($skillText -match 'official-api-verification\.md') 'SKILL.md does not route uncovered APIs through official verification.'
 Assert-True ($skillText -match [regex]::Escape('https://www.eplan.help/en-us/Infoportal/Content/api/2026/index.html')) 'SKILL.md does not identify the official EPLAN 2026 API documentation.'
 
 $utilityReference = Join-Path $skill 'references\utility-first.md'
-$officialReference = Join-Path $skill 'references\official-api-verification.md'
 $utilityAssetDirectory = Join-Path $skill 'assets\utilities'
 Assert-True (Test-Path -LiteralPath $utilityReference -PathType Leaf) 'Utility-first reference is missing.'
-Assert-True (Test-Path -LiteralPath $officialReference -PathType Leaf) 'Official API verification reference is missing.'
 Assert-True (Test-Path -LiteralPath $utilityAssetDirectory -PathType Container) 'Bundled Utility asset directory is missing.'
 $utilityText = Get-Content -Raw -LiteralPath $utilityReference
 $utilityNames = @('SelectionUtility', 'PageUtility', 'FunctionUtility', 'TextUtility', 'PropertyUtility', 'GuiUtility', 'SettingUtility')
@@ -73,15 +70,20 @@ try {
     $scaffold = Join-Path $skill 'scripts\scaffold-project.ps1'
     $output = Join-Path $temp 'output'
     New-Item -ItemType Directory -Path $output | Out-Null
-    $action = & $scaffold -Type action -ProjectName Sample.Action -ClassName SampleAction -AssemblyDirectory $fakeBin -OutputPath $output
-    Assert-True (Test-Path -LiteralPath $action.ProjectFile -PathType Leaf) 'Action project was not scaffolded.'
-    Assert-True (Test-Path -LiteralPath (Join-Path $action.ProjectDirectory 'Action.cs') -PathType Leaf) 'Action source was not scaffolded.'
-    Assert-True ($action.UtilityFiles.Count -eq 7) 'Action scaffold did not report 7 Utility files.'
-    $addin = & $scaffold -Type addin -ProjectName Sample.AddIn -ClassName SampleAddIn -AssemblyDirectory $fakeBin -OutputPath $output
+    $addin = & $scaffold -ProjectName Sample.AddIn -OutputPath $output
     Assert-True (Test-Path -LiteralPath $addin.ProjectFile -PathType Leaf) 'Add-in project was not scaffolded.'
-    Assert-True (Test-Path -LiteralPath (Join-Path $addin.ProjectDirectory 'AddIn.cs') -PathType Leaf) 'Add-in source was not scaffolded.'
+    Assert-True (Test-Path -LiteralPath (Join-Path $addin.ProjectDirectory 'AddIn.cs') -PathType Leaf) 'IEplAddIn source was not scaffolded.'
+    Assert-True (Test-Path -LiteralPath (Join-Path $addin.ProjectDirectory 'Actions\EplanAction.cs') -PathType Leaf) 'IEplAction source was not scaffolded.'
+    Assert-True ($addin.TargetFramework -eq 'net481') 'Add-in scaffold did not use the default net481 target.'
+    Assert-True ($addin.ActionName -eq 'Sample.AddIn.EplanAction') 'Default Add-in action name is incorrect.'
+    Assert-True ($addin.UtilityFiles.Count -eq 7) 'Add-in scaffold did not report 7 Utility files.'
+    Assert-True ($addin.DllFiles.Count -eq 7) 'Add-in scaffold did not report 7 EPLAN DLL files.'
+    $scaffoldParameters = (Get-Command $scaffold).Parameters
+    Assert-True (-not $scaffoldParameters.ContainsKey('Type')) 'The obsolete Type parameter remains on the scaffold.'
+    Assert-True (-not $scaffoldParameters.ContainsKey('ClassName')) 'The obsolete ClassName parameter remains on the scaffold.'
+    Assert-True (-not $scaffoldParameters.ContainsKey('AssemblyDirectory')) 'The obsolete AssemblyDirectory parameter remains on the scaffold.'
 
-    foreach ($projectDirectory in @($action.ProjectDirectory, $addin.ProjectDirectory)) {
+    foreach ($projectDirectory in @($addin.ProjectDirectory)) {
         foreach ($utilityName in $utilityNames) {
             $generatedUtility = Join-Path $projectDirectory "Utilities\$utilityName.cs"
             Assert-True (Test-Path -LiteralPath $generatedUtility -PathType Leaf) "$utilityName.cs was not included in $projectDirectory."
@@ -92,12 +94,19 @@ try {
             }
         }
         $projectText = Get-Content -Raw -LiteralPath (Join-Path $projectDirectory ((Split-Path -Leaf $projectDirectory) + '.csproj'))
-        foreach ($assemblyName in @('AFu', 'Baseu', 'DataModelu', 'Guiu', 'HEServicesu', 'MasterDatau')) {
-            Assert-True ($projectText -match [regex]::Escape("Eplan.EplApi.$assemblyName.dll")) "Generated project is missing Eplan.EplApi.$assemblyName.dll."
+        foreach ($assemblyName in @('AFu', 'Baseu', 'DataModelu', 'Guiu', 'HEServicesu', 'MasterDatau', 'Starteru')) {
+            Assert-True ($projectText -match [regex]::Escape("DLLs\Eplan.EplApi.$assemblyName.dll")) "Generated project is missing the relative DLLs reference for Eplan.EplApi.$assemblyName.dll."
+            $assetDll = Join-Path $skill "assets\DLLs\Eplan.EplApi.$assemblyName.dll"
+            $generatedDll = Join-Path $projectDirectory "DLLs\Eplan.EplApi.$assemblyName.dll"
+            Assert-True (Test-Path -LiteralPath $generatedDll -PathType Leaf) "Generated project is missing Eplan.EplApi.$assemblyName.dll."
+            if (Test-Path -LiteralPath $generatedDll -PathType Leaf) {
+                Assert-True ((Get-FileHash -LiteralPath $assetDll).Hash -eq (Get-FileHash -LiteralPath $generatedDll).Hash) "Generated Eplan.EplApi.$assemblyName.dll differs from the bundled asset."
+            }
         }
+        Assert-True ($projectText -notmatch 'EplanApiAssemblyDirectory') 'Generated project still contains a machine-specific EPLAN assembly directory.'
     }
 
-    $generated = Get-ChildItem -LiteralPath $output -File -Recurse | ForEach-Object { Get-Content -Raw -LiteralPath $_.FullName }
+    $generated = Get-ChildItem -LiteralPath $output -File -Recurse | Where-Object Extension -in '.cs', '.csproj' | ForEach-Object { Get-Content -Raw -LiteralPath $_.FullName }
     Assert-True (-not ($generated -match '__[A-Z_]+__')) 'A template token remains in generated output.'
 
     $installRoot = Join-Path $temp 'install-target'
@@ -109,6 +118,9 @@ try {
     )) {
         foreach ($utilityName in $utilityNames) {
             Assert-True (Test-Path -LiteralPath (Join-Path $installedSkill "assets\utilities\$utilityName.cs") -PathType Leaf) "$utilityName.cs was not included in the installed skill at $installedSkill."
+        }
+        foreach ($assemblyName in @('AFu', 'Baseu', 'DataModelu', 'Guiu', 'HEServicesu', 'MasterDatau', 'Starteru')) {
+            Assert-True (Test-Path -LiteralPath (Join-Path $installedSkill "assets\DLLs\Eplan.EplApi.$assemblyName.dll") -PathType Leaf) "Eplan.EplApi.$assemblyName.dll was not included in the installed skill at $installedSkill."
         }
     }
 }

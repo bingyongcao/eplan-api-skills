@@ -1,18 +1,18 @@
 using Eplan.EplApi.ApplicationFramework;
 
-namespace __ROOT_NAMESPACE__;
-
-// Verify the IEplAddIn lifecycle contract against the selected EPLAN API version before deployment.
-public sealed class __CLASS_NAME__ : IEplAddIn
+namespace __ROOT_NAMESPACE__
 {
-    public bool OnRegister(ref bool loadOnStart)
+    public sealed class EplanAddIn : IEplAddIn
     {
-        loadOnStart = true;
-        return true;
-    }
+        public bool OnRegister(ref bool loadOnStart)
+        {
+            loadOnStart = true;
+            return true;
+        }
 
-    public bool OnUnregister() => true;
-    public bool OnInit() => true;
-    public bool OnInitGui() => true;
-    public bool OnExit() => true;
+        public bool OnUnregister() => true;
+        public bool OnInit() => true;
+        public bool OnInitGui() => true;
+        public bool OnExit() => true;
+    }
 }

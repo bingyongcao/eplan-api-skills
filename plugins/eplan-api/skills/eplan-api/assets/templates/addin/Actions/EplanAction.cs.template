@@ -1,0 +1,24 @@
+using Eplan.EplApi.ApplicationFramework;
+
+namespace __ROOT_NAMESPACE__
+{
+    public sealed class EplanAction : IEplAction
+    {
+        public bool Execute(ActionCallingContext callingContext)
+        {
+            // Add the smallest version-verified operation here.
+            return true;
+        }
+
+        public void GetActionProperties(ref ActionProperties actionProperties)
+        {
+        }
+
+        public bool OnRegister(ref string name, ref int ordinal)
+        {
+            name = "__ACTION_NAME__";
+            ordinal = 20;
+            return true;
+        }
+    }
+}

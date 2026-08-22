@@ -1,6 +1,6 @@
 ---
 name: eplan-api
-description: Build, modify, and review EPLAN add-in code. Use for EPLAN project-data operations. Do not use for ordinary .NET work unrelated to EPLAN.
+description: Build, modify, and review EPLAN add-ins, including IEplAddIn lifecycle code and IEplAction commands. Use for EPLAN project-data operations. Do not use for EPLAN scripts or ordinary .NET work unrelated to EPLAN.
 ---
 
 # EPLAN API
@@ -45,12 +45,11 @@ The scaffold copies all seven sources from `assets/utilities/` into the generate
 ```powershell
 & "<skill>/scripts/detect-eplan.ps1" -AsJson
 & "<skill>/scripts/validate-environment.ps1" -AsJson
-& "<skill>/scripts/scaffold-project.ps1" -Type action -ProjectName Example.Action `
-  -ClassName ExampleAction -AssemblyDirectory "C:\path\to\EPLAN\Bin" -OutputPath .
-& "<skill>/scripts/build-project.ps1" -ProjectPath .\Example.Action.csproj `
-  -ApiAssemblyDirectory "C:\path\to\EPLAN\Bin"
+& "<skill>/scripts/scaffold-project.ps1" -ProjectName Example.AddIn -OutputPath . `
+  -ActionName Example.Action
 ```
 
-Use `scaffold-project.ps1` only for new projects. Modify existing project files directly after
-inspecting their conventions. The scaffold expects the EPLAN 2026 unified assembly set (`AFu`,
-`Baseu`, `DataModelu`, `Guiu`, `HEServicesu`, and `MasterDatau`) in `-AssemblyDirectory`.
+Use `scaffold-project.ps1` only for new Add-in projects. Modify existing project files directly
+after inspecting their conventions. The scaffold generates both `EplanAddIn : IEplAddIn` and
+`EplanAction : IEplAction`, copies the seven bundled EPLAN 2026.0.3 unified assemblies into the
+project's `DLLs/` directory, and references them with relative paths.

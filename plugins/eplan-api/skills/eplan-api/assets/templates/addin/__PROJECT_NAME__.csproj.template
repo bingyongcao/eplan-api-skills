@@ -1,34 +1,38 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>__TARGET_FRAMEWORK__</TargetFramework>
+    <LangVersion>9.0</LangVersion>
     <PlatformTarget>x64</PlatformTarget>
     <RootNamespace>__ROOT_NAMESPACE__</RootNamespace>
     <AssemblyName>__PROJECT_NAME__</AssemblyName>
-    <EplanApiAssemblyDirectory Condition="'$(EplanApiAssemblyDirectory)' == ''">__EPLAN_API_DIR__</EplanApiAssemblyDirectory>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Eplan.EplApi.AFu">
-      <HintPath>$(EplanApiAssemblyDirectory)\Eplan.EplApi.AFu.dll</HintPath>
+      <HintPath>DLLs\Eplan.EplApi.AFu.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Eplan.EplApi.Baseu">
-      <HintPath>$(EplanApiAssemblyDirectory)\Eplan.EplApi.Baseu.dll</HintPath>
+      <HintPath>DLLs\Eplan.EplApi.Baseu.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Eplan.EplApi.DataModelu">
-      <HintPath>$(EplanApiAssemblyDirectory)\Eplan.EplApi.DataModelu.dll</HintPath>
+      <HintPath>DLLs\Eplan.EplApi.DataModelu.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Eplan.EplApi.Guiu">
-      <HintPath>$(EplanApiAssemblyDirectory)\Eplan.EplApi.Guiu.dll</HintPath>
+      <HintPath>DLLs\Eplan.EplApi.Guiu.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Eplan.EplApi.HEServicesu">
-      <HintPath>$(EplanApiAssemblyDirectory)\Eplan.EplApi.HEServicesu.dll</HintPath>
+      <HintPath>DLLs\Eplan.EplApi.HEServicesu.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Eplan.EplApi.MasterDatau">
-      <HintPath>$(EplanApiAssemblyDirectory)\Eplan.EplApi.MasterDatau.dll</HintPath>
+      <HintPath>DLLs\Eplan.EplApi.MasterDatau.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Eplan.EplApi.Starteru">
+      <HintPath>DLLs\Eplan.EplApi.Starteru.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="PresentationCore" />

@@ -1,5 +1,7 @@
 # EPLAN API skills
 
+[English](README.md) | [简体中文](README.zh-CN.md)
+
 An agent skill for building EPLAN Platform P8 add-ins.
 
 ## Install

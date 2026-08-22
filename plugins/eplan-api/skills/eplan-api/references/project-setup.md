@@ -18,16 +18,16 @@ Do not replace this with an SDK-style project or a modern .NET target as an inci
 Use the Visual Studio MSBuild toolchain that supports .NET Framework, legacy WPF markup compilation,
 and the selected language version.
 
-The bundled scaffold remains suitable for minimal new actions and add-ins. Supply its target
-framework and EPLAN API assembly directory explicitly; do not assume that its SDK-style layout can
-replace a working legacy project.
+The bundled scaffold creates a minimal new Add-in containing an `IEplAddIn` lifecycle class and an
+`IEplAction` command class. It copies its pinned EPLAN API assemblies into the generated project's
+`DLLs/` directory; do not assume that its SDK-style layout can replace a working legacy project.
 
 ## EPLAN references and WPF
 
-Reference one verified EPLAN 2026 unified assembly set. Typical add-ins use `AFu`, `Baseu`,
-`DataModelu`, `Guiu`, `HEServicesu`, `MasterDatau`, and, when required, `Starteru`. Set EPLAN-owned
-references to `Private=False`; do not mix installation versions or unified and legacy assemblies.
-Keep machine-specific paths local or parameterized, and do not commit licensed EPLAN DLLs.
+Reference one verified EPLAN 2026 unified assembly set. The scaffold bundles `AFu`, `Baseu`,
+`DataModelu`, `Guiu`, `HEServicesu`, `MasterDatau`, and `Starteru` version 2026.0.3 and uses
+relative `DLLs/` hint paths. Set EPLAN-owned references to `Private=False`; keep the bundled set
+together, and do not mix installation versions or unified and legacy assemblies.
 
 For WPF, include only the required framework references and declare XAML pages with
 `Generator=MSBuild:Compile`. A typical .NET Framework 4.8.1 add-in needs `PresentationCore`,

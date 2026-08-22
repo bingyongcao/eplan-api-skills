@@ -1,40 +1,33 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)]
-    [ValidateSet('action', 'addin')]
-    [string]$Type,
-    [Parameter(Mandatory)]
     [ValidatePattern('^[A-Za-z_][A-Za-z0-9_.-]*$')]
     [string]$ProjectName,
     [Parameter(Mandatory)]
-    [ValidatePattern('^[A-Za-z_][A-Za-z0-9_]*$')]
-    [string]$ClassName,
-    [Parameter(Mandatory)]
-    [string]$AssemblyDirectory,
-    [Parameter(Mandatory)]
     [string]$OutputPath,
-    [string]$TargetFramework = 'net48',
+    [string]$TargetFramework = 'net481',
     [string]$RootNamespace,
     [string]$ActionName,
     [switch]$Force
 )
 
 $ErrorActionPreference = 'Stop'
-if (-not (Test-Path -LiteralPath $AssemblyDirectory -PathType Container)) {
-    throw "Assembly directory does not exist: $AssemblyDirectory"
-}
-$resolvedAssemblyDirectory = (Resolve-Path -LiteralPath $AssemblyDirectory).Path
 $requiredAssemblies = @(
     'Eplan.EplApi.AFu.dll',
     'Eplan.EplApi.Baseu.dll',
     'Eplan.EplApi.DataModelu.dll',
     'Eplan.EplApi.Guiu.dll',
     'Eplan.EplApi.HEServicesu.dll',
-    'Eplan.EplApi.MasterDatau.dll'
+    'Eplan.EplApi.MasterDatau.dll',
+    'Eplan.EplApi.Starteru.dll'
 )
+$assemblyAssetRoot = Join-Path $PSScriptRoot '..\assets\DLLs'
+if (-not (Test-Path -LiteralPath $assemblyAssetRoot -PathType Container)) {
+    throw "Bundled EPLAN API assembly directory was not found: $assemblyAssetRoot"
+}
 foreach ($requiredAssembly in $requiredAssemblies) {
-    if (-not (Test-Path -LiteralPath (Join-Path $resolvedAssemblyDirectory $requiredAssembly) -PathType Leaf)) {
-        throw "Required EPLAN API assembly was not found: $requiredAssembly"
+    if (-not (Test-Path -LiteralPath (Join-Path $assemblyAssetRoot $requiredAssembly) -PathType Leaf)) {
+        throw "Bundled EPLAN API assembly was not found: $requiredAssembly"
     }
 }
 
@@ -50,9 +43,9 @@ if (Test-Path -LiteralPath $destination) {
     Remove-Item -LiteralPath $destination -Recurse -Force
 }
 
-$templateRoot = Join-Path (Join-Path $PSScriptRoot '..\assets\templates') $Type
+$templateRoot = Join-Path $PSScriptRoot '..\assets\templates\addin'
 if (-not (Test-Path -LiteralPath $templateRoot -PathType Container)) {
-    throw "Bundled template was not found: $templateRoot"
+    throw "Bundled Add-in template was not found: $templateRoot"
 }
 $utilityRoot = Join-Path $PSScriptRoot '..\assets\utilities'
 if (-not (Test-Path -LiteralPath $utilityRoot -PathType Container)) {
@@ -64,19 +57,20 @@ if ($utilitySources.Count -ne 7) {
 }
 
 $namespace = if ($RootNamespace) { $RootNamespace } else { $ProjectName -replace '-', '_' }
-$registeredActionName = if ($ActionName) { $ActionName } else { "$namespace.$ClassName" }
+$registeredActionName = if ($ActionName) { $ActionName } else { "$namespace.EplanAction" }
 $tokens = [ordered]@{
     '__PROJECT_NAME__' = $ProjectName
     '__ROOT_NAMESPACE__' = $namespace
-    '__CLASS_NAME__' = $ClassName
     '__ACTION_NAME__' = $registeredActionName
     '__TARGET_FRAMEWORK__' = $TargetFramework
-    '__EPLAN_API_DIR__' = $resolvedAssemblyDirectory
 }
 
+$utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+
 New-Item -ItemType Directory -Path $destination | Out-Null
+$templatePrefix = (Resolve-Path -LiteralPath $templateRoot).Path.TrimEnd('\') + '\'
 Get-ChildItem -LiteralPath $templateRoot -File -Recurse | ForEach-Object {
-    $relative = [System.IO.Path]::GetRelativePath($templateRoot, $_.FullName)
+    $relative = $_.FullName.Substring($templatePrefix.Length)
     if ($relative.EndsWith('.template', [System.StringComparison]::OrdinalIgnoreCase)) {
         $relative = $relative.Substring(0, $relative.Length - '.template'.Length)
     }
@@ -88,7 +82,7 @@ Get-ChildItem -LiteralPath $templateRoot -File -Recurse | ForEach-Object {
     }
     $content = Get-Content -Raw -LiteralPath $_.FullName
     foreach ($token in $tokens.Keys) { $content = $content.Replace($token, $tokens[$token]) }
-    Set-Content -LiteralPath $outputFile -Value $content -Encoding utf8NoBOM
+    [System.IO.File]::WriteAllText($outputFile, $content, $utf8NoBom)
 }
 
 $utilityDestination = Join-Path $destination 'Utilities'
@@ -96,15 +90,22 @@ New-Item -ItemType Directory -Path $utilityDestination | Out-Null
 foreach ($utilitySource in $utilitySources) {
     $utilityOutput = Join-Path $utilityDestination $utilitySource.Name
     $utilityContent = Get-Content -Raw -LiteralPath $utilitySource.FullName
-    Set-Content -LiteralPath $utilityOutput -Value $utilityContent -Encoding utf8NoBOM
+    [System.IO.File]::WriteAllText($utilityOutput, $utilityContent, $utf8NoBom)
+}
+
+$assemblyDestination = Join-Path $destination 'DLLs'
+New-Item -ItemType Directory -Path $assemblyDestination | Out-Null
+foreach ($requiredAssembly in $requiredAssemblies) {
+    Copy-Item -LiteralPath (Join-Path $assemblyAssetRoot $requiredAssembly) -Destination $assemblyDestination
 }
 
 [pscustomobject]@{
-    Type = $Type
+    Type = 'AddIn'
     ProjectDirectory = $destination
     ProjectFile = Join-Path $destination "$ProjectName.csproj"
     TargetFramework = $TargetFramework
-    AssemblyDirectory = $resolvedAssemblyDirectory
+    ActionName = $registeredActionName
+    DllFiles = @($requiredAssemblies)
     UtilityFiles = @($utilitySources.Name)
     RequiresTargetVersionVerification = $true
 }
