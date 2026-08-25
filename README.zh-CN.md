@@ -53,3 +53,34 @@ git pull --ff-only
 ```
 
 重启 Agent 或开始新会话，使其重新加载更新后的 Skill。
+
+## 卸载
+
+### Claude Code 插件
+
+```text
+/plugin uninstall eplan-api@eplan-api-skills
+```
+
+如果还需要删除 Marketplace 条目：
+
+```text
+/plugin marketplace remove eplan-api-skills
+```
+
+### Codex 或通用 Skill
+
+在已克隆仓库的 PowerShell 终端中，卸载用户范围的 Codex Skill：
+
+```powershell
+.\tools\uninstall.ps1 -Target Codex -Scope User
+```
+
+同时从两个本地 Agent 中卸载：
+
+```powershell
+.\tools\uninstall.ps1 -Target Both -Scope User
+```
+
+对于项目范围的安装，请使用 `-Scope Project -ProjectRoot <path>`。重启 Agent 或开始新会话，
+以完成 Skill 的卸载。

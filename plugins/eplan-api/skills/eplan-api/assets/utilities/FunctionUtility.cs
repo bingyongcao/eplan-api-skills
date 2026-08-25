@@ -471,7 +471,7 @@ namespace EplanUtilities
 
             func.ArticleReferences[articleRefIndex]
                 .ParentObject
-                .Properties[propertyId, 1] = valueStr;
+                .Properties[propertyId, articleRefIndex + 1] = valueStr;
         }
 
         /// <summary>
@@ -495,7 +495,7 @@ namespace EplanUtilities
 
             func.ArticleReferences[articleRefIndex]
                 .ParentObject
-                .Properties[userDefinedPropertyName][1] = valueStr;
+                .Properties[userDefinedPropertyName][articleRefIndex + 1] = valueStr;
         }
     }
 }

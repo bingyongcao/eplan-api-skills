@@ -123,6 +123,11 @@ try {
             Assert-True (Test-Path -LiteralPath (Join-Path $installedSkill "assets\DLLs\Eplan.EplApi.$assemblyName.dll") -PathType Leaf) "Eplan.EplApi.$assemblyName.dll was not included in the installed skill at $installedSkill."
         }
     }
+
+    $uninstall = Join-Path $repo 'tools\uninstall.ps1'
+    & $uninstall -Target Both -Scope Project -ProjectRoot $installRoot | Out-Null
+    Assert-True (-not (Test-Path -LiteralPath (Join-Path $installRoot '.agents\skills\eplan-api'))) 'Codex project-scoped skill was not uninstalled.'
+    Assert-True (-not (Test-Path -LiteralPath (Join-Path $installRoot '.claude\skills\eplan-api'))) 'Claude project-scoped skill was not uninstalled.'
 }
 finally {
     if (Test-Path -LiteralPath $temp) { Remove-Item -LiteralPath $temp -Recurse -Force }

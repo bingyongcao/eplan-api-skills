@@ -54,3 +54,34 @@ git pull --ff-only
 ```
 
 Restart the agent, or start a new session, so it reloads the updated skill.
+
+## Uninstall
+
+### Claude Code plugin
+
+```text
+/plugin uninstall eplan-api@eplan-api-skills
+```
+
+To also remove the marketplace entry:
+
+```text
+/plugin marketplace remove eplan-api-skills
+```
+
+### Codex or plain-skill
+
+From a PowerShell prompt in the cloned repository, uninstall the user-scoped Codex skill:
+
+```powershell
+.\tools\uninstall.ps1 -Target Codex -Scope User
+```
+
+Uninstall from both local agents:
+
+```powershell
+.\tools\uninstall.ps1 -Target Both -Scope User
+```
+
+For a repository-scoped installation, use `-Scope Project -ProjectRoot <path>`. Restart the agent,
+or start a new session, to finish unloading the skill.
