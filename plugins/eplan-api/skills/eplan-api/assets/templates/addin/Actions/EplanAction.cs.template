@@ -4,6 +4,8 @@ namespace __ROOT_NAMESPACE__
 {
     public class EplanAction : IEplAction
     {
+        public static string ActionName = "__ACTION_NAME__";
+
         public bool Execute(ActionCallingContext callingContext)
         {
             // Add the smallest version-verified operation here.
@@ -16,7 +18,7 @@ namespace __ROOT_NAMESPACE__
 
         public bool OnRegister(ref string name, ref int ordinal)
         {
-            name = "__ACTION_NAME__";
+            name = ActionName;
             ordinal = 20;
             return true;
         }

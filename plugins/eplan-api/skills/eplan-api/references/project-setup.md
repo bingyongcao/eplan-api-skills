@@ -26,6 +26,18 @@ Name an add-in assembly using the `*.EplAddIn.*` convention, with non-empty segm
 of `EplAddIn` (for example, `Company.EplAddIn.PageTools`). Registered EPLAN action names must not
 contain dots; use an undotted name such as `Company_PageTools_Open`.
 
+Define each action name once on its `IEplAction` class as `public static string ActionName`. Use
+that field both in `OnRegister` and wherever the add-in adds the command to a menu or ribbon group,
+for example `group.AddCommand(buttonName, ActionClass.ActionName)`. Do not repeat the registered
+action-name string in the add-in class.
+
+Create persistent ribbon commands in `IEplAddIn.OnRegister`, and remove the owned custom tab in
+`OnUnregister`. Set `loadOnStart = true` so the add-in is loaded in later EPLAN sessions. Clean the
+owned custom tab before recreating it to avoid stale or duplicate ribbon entries. Keep `OnInitGui`
+for UI work that must wait until the loaded add-in's user interface is initialized; do not duplicate
+persistent ribbon registration there. Avoid modal success messages during registration and
+unregistration.
+
 ## EPLAN references and WPF
 
 Reference one verified EPLAN 2026 unified assembly set. The scaffold bundles `AFu`, `Baseu`,

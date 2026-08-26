@@ -1,18 +1,41 @@
 using Eplan.EplApi.ApplicationFramework;
+using Eplan.EplApi.Gui;
+using EplanUtilities;
 
 namespace __ROOT_NAMESPACE__
 {
     public class EplanAddIn : IEplAddIn
     {
+        private const string RIBBON_TAB_NAME = "__PROJECT_NAME__";
+        private const string COMMAND_GROUP_NAME = "Common";
+        private const string COMMAND_NAME = "Run";
+
         public bool OnRegister(ref bool loadOnStart)
         {
             loadOnStart = true;
+            RegisterRibbon();
             return true;
         }
 
-        public bool OnUnregister() => true;
+        public bool OnUnregister()
+        {
+            GuiUtility.CleanCustomRibbonTab(RIBBON_TAB_NAME);
+            return true;
+        }
+
         public bool OnInit() => true;
         public bool OnInitGui() => true;
         public bool OnExit() => true;
+
+        private static void RegisterRibbon()
+        {
+            GuiUtility.CleanCustomRibbonTab(RIBBON_TAB_NAME);
+
+            var ribbonBar = new RibbonBar();
+            var ribbonTab = ribbonBar.AddTab(RIBBON_TAB_NAME);
+            var commandGroup = ribbonTab.AddCommandGroup(COMMAND_GROUP_NAME, 0);
+
+            commandGroup.AddCommand(COMMAND_NAME, EplanAction.ActionName);
+        }
     }
 }

@@ -103,6 +103,16 @@ try {
     }
     Assert-True $invalidAssemblyRejected 'The scaffold accepted an assembly name outside the *.EplAddIn.* convention.'
 
+    $generatedActionText = Get-Content -Raw -LiteralPath (Join-Path $addin.ProjectDirectory 'Actions\EplanAction.cs')
+    $generatedAddInText = Get-Content -Raw -LiteralPath (Join-Path $addin.ProjectDirectory 'AddIn.cs')
+    Assert-True ($generatedActionText -match 'public static string ActionName = "Sample_EplAddIn_Tools_EplanAction";') 'Generated action does not expose its registered name.'
+    Assert-True ($generatedActionText -match 'name = ActionName;') 'Generated action does not use ActionName during registration.'
+    Assert-True ($generatedAddInText -match 'commandGroup\.AddCommand\(COMMAND_NAME, EplanAction\.ActionName\);') 'Generated add-in does not reuse the action name when creating its command.'
+    Assert-True ($generatedAddInText -notmatch [regex]::Escape($addin.ActionName)) 'Generated add-in duplicates the registered action-name string.'
+    Assert-True ($generatedAddInText -match 'loadOnStart = true;\s+RegisterRibbon\(\);') 'Generated add-in does not register its ribbon during OnRegister.'
+    Assert-True ($generatedAddInText -match 'OnUnregister\(\)[\s\S]+GuiUtility\.CleanCustomRibbonTab\(RIBBON_TAB_NAME\);') 'Generated add-in does not clean its ribbon during OnUnregister.'
+    Assert-True ($generatedAddInText -notmatch '\bDecider\b') 'Generated add-in contains a modal registration notification.'
+
     foreach ($projectDirectory in @($addin.ProjectDirectory)) {
         foreach ($utilityName in $utilityNames) {
             $generatedUtility = Join-Path $projectDirectory "Utilities\$utilityName.cs"
