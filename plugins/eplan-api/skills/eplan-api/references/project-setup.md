@@ -22,6 +22,10 @@ The bundled scaffold creates a minimal new Add-in containing an `IEplAddIn` life
 `IEplAction` command class. It copies its pinned EPLAN API assemblies into the generated project's
 `DLLs/` directory; do not assume that its SDK-style layout can replace a working legacy project.
 
+Name an add-in assembly using the `*.EplAddIn.*` convention, with non-empty segments on both sides
+of `EplAddIn` (for example, `Company.EplAddIn.PageTools`). Registered EPLAN action names must not
+contain dots; use an undotted name such as `Company_PageTools_Open`.
+
 ## EPLAN references and WPF
 
 Reference one verified EPLAN 2026 unified assembly set. The scaffold bundles `AFu`, `Baseu`,

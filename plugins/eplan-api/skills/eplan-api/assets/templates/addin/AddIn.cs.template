@@ -2,7 +2,7 @@ using Eplan.EplApi.ApplicationFramework;
 
 namespace __ROOT_NAMESPACE__
 {
-    public sealed class EplanAddIn : IEplAddIn
+    public class EplanAddIn : IEplAddIn
     {
         public bool OnRegister(ref bool loadOnStart)
         {

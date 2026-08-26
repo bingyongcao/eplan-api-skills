@@ -31,10 +31,8 @@ Develop against the EPLAN Platform P8 API.
   Apply these defaults where the target repository does not define a conflicting convention.
 - Read [utility-first.md](references/utility-first.md) before accessing EPLAN data in a repository
   that contains the supplied Utility family. Use its method catalog and composition order.
-- Read [project-setup.md](references/project-setup.md) for project files, references, build output,
-  and templates.
-- Read [api-fundamentals.md](references/api-fundamentals.md) before introducing unfamiliar API
-  symbols or lifecycle behavior.
+- Read [project-setup.md](references/project-setup.md) before building a new add-in project from scratch.
+- Read [api-fundamentals.md](references/api-fundamentals.md) before writing, modifying, or reviewing code.
 
 ## Use bundled tools
 
@@ -45,11 +43,12 @@ The scaffold copies all seven sources from `assets/utilities/` into the generate
 ```powershell
 & "<skill>/scripts/detect-eplan.ps1" -AsJson
 & "<skill>/scripts/validate-environment.ps1" -AsJson
-& "<skill>/scripts/scaffold-project.ps1" -ProjectName Example.AddIn -OutputPath . `
-  -ActionName Example.Action
+& "<skill>/scripts/scaffold-project.ps1" -ProjectName Example.EplAddIn.Tools -OutputPath . `
+  -ActionName ExampleAction
 ```
 
 Use `scaffold-project.ps1` only for new Add-in projects. Modify existing project files directly
 after inspecting their conventions. The scaffold generates both `EplanAddIn : IEplAddIn` and
 `EplanAction : IEplAction`, copies the seven bundled EPLAN 2026.0.3 unified assemblies into the
-project's `DLLs/` directory, and references them with relative paths.
+project's `DLLs/` directory, and references them with relative paths. Registered action names must
+not contain dots. Generated assembly names must match `*.EplAddIn.*`.

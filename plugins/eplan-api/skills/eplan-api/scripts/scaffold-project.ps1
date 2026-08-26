@@ -7,11 +7,22 @@ param(
     [string]$OutputPath,
     [string]$TargetFramework = 'net481',
     [string]$RootNamespace,
+    [string]$AssemblyName,
     [string]$ActionName,
     [switch]$Force
 )
 
 $ErrorActionPreference = 'Stop'
+$namespace = if ($RootNamespace) { $RootNamespace } else { $ProjectName -replace '-', '_' }
+$generatedAssemblyName = if ($AssemblyName) { $AssemblyName } else { $ProjectName }
+if ($generatedAssemblyName -notmatch '^.+\.EplAddIn\..+$') {
+    throw "Assembly name must match '*.EplAddIn.*': $generatedAssemblyName"
+}
+$registeredActionName = if ($ActionName) { $ActionName } else { (($namespace -replace '[^A-Za-z0-9_]', '_').Trim('_') + '_EplanAction') }
+if ($registeredActionName.Contains('.')) {
+    throw "Action name must not contain '.': $registeredActionName"
+}
+
 $requiredAssemblies = @(
     'Eplan.EplApi.AFu.dll',
     'Eplan.EplApi.Baseu.dll',
@@ -56,11 +67,10 @@ if ($utilitySources.Count -ne 7) {
     throw "Expected 7 bundled Utility sources but found $($utilitySources.Count): $utilityRoot"
 }
 
-$namespace = if ($RootNamespace) { $RootNamespace } else { $ProjectName -replace '-', '_' }
-$registeredActionName = if ($ActionName) { $ActionName } else { "$namespace.EplanAction" }
 $tokens = [ordered]@{
     '__PROJECT_NAME__' = $ProjectName
     '__ROOT_NAMESPACE__' = $namespace
+    '__ASSEMBLY_NAME__' = $generatedAssemblyName
     '__ACTION_NAME__' = $registeredActionName
     '__TARGET_FRAMEWORK__' = $TargetFramework
 }
@@ -104,6 +114,7 @@ foreach ($requiredAssembly in $requiredAssemblies) {
     ProjectDirectory = $destination
     ProjectFile = Join-Path $destination "$ProjectName.csproj"
     TargetFramework = $TargetFramework
+    AssemblyName = $generatedAssemblyName
     ActionName = $registeredActionName
     DllFiles = @($requiredAssemblies)
     UtilityFiles = @($utilitySources.Name)

@@ -70,18 +70,38 @@ try {
     $scaffold = Join-Path $skill 'scripts\scaffold-project.ps1'
     $output = Join-Path $temp 'output'
     New-Item -ItemType Directory -Path $output | Out-Null
-    $addin = & $scaffold -ProjectName Sample.AddIn -OutputPath $output
+    $addin = & $scaffold -ProjectName Sample.EplAddIn.Tools -OutputPath $output
     Assert-True (Test-Path -LiteralPath $addin.ProjectFile -PathType Leaf) 'Add-in project was not scaffolded.'
     Assert-True (Test-Path -LiteralPath (Join-Path $addin.ProjectDirectory 'AddIn.cs') -PathType Leaf) 'IEplAddIn source was not scaffolded.'
     Assert-True (Test-Path -LiteralPath (Join-Path $addin.ProjectDirectory 'Actions\EplanAction.cs') -PathType Leaf) 'IEplAction source was not scaffolded.'
     Assert-True ($addin.TargetFramework -eq 'net481') 'Add-in scaffold did not use the default net481 target.'
-    Assert-True ($addin.ActionName -eq 'Sample.AddIn.EplanAction') 'Default Add-in action name is incorrect.'
+    Assert-True ($addin.AssemblyName -eq 'Sample.EplAddIn.Tools') 'Default Add-in assembly name is incorrect.'
+    Assert-True ($addin.ActionName -eq 'Sample_EplAddIn_Tools_EplanAction') 'Default Add-in action name is incorrect.'
+    Assert-True (-not $addin.ActionName.Contains('.')) 'Default Add-in action name contains a dot.'
     Assert-True ($addin.UtilityFiles.Count -eq 7) 'Add-in scaffold did not report 7 Utility files.'
     Assert-True ($addin.DllFiles.Count -eq 7) 'Add-in scaffold did not report 7 EPLAN DLL files.'
     $scaffoldParameters = (Get-Command $scaffold).Parameters
     Assert-True (-not $scaffoldParameters.ContainsKey('Type')) 'The obsolete Type parameter remains on the scaffold.'
     Assert-True (-not $scaffoldParameters.ContainsKey('ClassName')) 'The obsolete ClassName parameter remains on the scaffold.'
     Assert-True (-not $scaffoldParameters.ContainsKey('AssemblyDirectory')) 'The obsolete AssemblyDirectory parameter remains on the scaffold.'
+
+    $invalidActionRejected = $false
+    try {
+        & $scaffold -ProjectName InvalidAction.EplAddIn.Test -OutputPath $output -ActionName 'Invalid.Action' | Out-Null
+    }
+    catch {
+        $invalidActionRejected = $_.Exception.Message -match "must not contain '\.'"
+    }
+    Assert-True $invalidActionRejected 'The scaffold accepted an action name containing a dot.'
+
+    $invalidAssemblyRejected = $false
+    try {
+        & $scaffold -ProjectName InvalidAssembly -OutputPath $output | Out-Null
+    }
+    catch {
+        $invalidAssemblyRejected = $_.Exception.Message -match "must match '\*\.EplAddIn\.\*'"
+    }
+    Assert-True $invalidAssemblyRejected 'The scaffold accepted an assembly name outside the *.EplAddIn.* convention.'
 
     foreach ($projectDirectory in @($addin.ProjectDirectory)) {
         foreach ($utilityName in $utilityNames) {
@@ -94,6 +114,7 @@ try {
             }
         }
         $projectText = Get-Content -Raw -LiteralPath (Join-Path $projectDirectory ((Split-Path -Leaf $projectDirectory) + '.csproj'))
+        Assert-True ($projectText -match '<AssemblyName>Sample\.EplAddIn\.Tools</AssemblyName>') 'Generated project has an invalid add-in assembly name.'
         foreach ($assemblyName in @('AFu', 'Baseu', 'DataModelu', 'Guiu', 'HEServicesu', 'MasterDatau', 'Starteru')) {
             Assert-True ($projectText -match [regex]::Escape("DLLs\Eplan.EplApi.$assemblyName.dll")) "Generated project is missing the relative DLLs reference for Eplan.EplApi.$assemblyName.dll."
             $assetDll = Join-Path $skill "assets\DLLs\Eplan.EplApi.$assemblyName.dll"

@@ -2,7 +2,7 @@ using Eplan.EplApi.ApplicationFramework;
 
 namespace __ROOT_NAMESPACE__
 {
-    public sealed class EplanAction : IEplAction
+    public class EplanAction : IEplAction
     {
         public bool Execute(ActionCallingContext callingContext)
         {
